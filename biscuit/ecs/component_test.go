@@ -7,5 +7,5 @@ func TestComonentManager_AddComponent(t *testing.T) {
 	e := new(Entity)
 	c := new(Component)
 
-	cm.AddComponent(e, c)
+	cm.AddComponent(*e, *c)
 }

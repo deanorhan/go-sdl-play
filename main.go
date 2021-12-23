@@ -11,8 +11,6 @@ func main() {
 	logger, _ := zap.NewDevelopment()
 	defer logger.Sync()
 
-	logger.Info("Dis something happen?")
-
 	if err := biscuit.InitEngine(); err != nil {
 		logger.Panic(fmt.Sprint("Something went wrong starting up: ", err.Error()))
 	}

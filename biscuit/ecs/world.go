@@ -5,11 +5,15 @@ import (
 )
 
 type World struct {
-	systems  []*System
+	systems  []System
 	entities EntityManager
 }
 
-func (w *World) AddSystem(sys *System) {
+func (w *World) NewEntity() (e Entity) {
+	return w.entities.NewEntity()
+}
+
+func (w *World) AddSystem(sys System) {
 	for _, system := range w.systems {
 		if reflect.TypeOf(sys) == reflect.TypeOf(system) {
 			return
@@ -19,7 +23,7 @@ func (w *World) AddSystem(sys *System) {
 	w.systems = append(w.systems, sys)
 }
 
-func (w *World) RemoveSystem(sys *System) {
+func (w *World) RemoveSystem(sys System) {
 	delete := -1
 	for idx, system := range w.systems {
 		if reflect.TypeOf(sys) == reflect.TypeOf(system) {

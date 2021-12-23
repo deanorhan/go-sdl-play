@@ -3,10 +3,10 @@ package ecs
 import "reflect"
 
 type System struct {
-	components []*Component
+	components []Component
 }
 
-func (s *System) AddComponent(comp *Component) {
+func (s *System) AddComponent(comp Component) {
 	for _, component := range s.components {
 		if reflect.TypeOf(comp) == reflect.TypeOf(component) {
 			return
