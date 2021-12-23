@@ -1,33 +1,54 @@
 package ecs
 
 import (
-	"reflect"
-
-	"github.com/veandco/go-sdl2/sdl"
+	"math"
+	"sync/atomic"
 )
 
+const maxEntityIds = math.MaxUint32
+
 type Entity struct {
-	id         uint32
-	components []*Component
+	id uint32
 }
 
-type Component interface {
-	onUpdate()
-	onRemove()
+type EntityManager struct {
+	id_counter uint32
+	entities   []*Entity
+	graveyard  []*Entity
 }
 
-func NewEntity(renderer *sdl.Renderer) (e Entity) {
-	e.id = 0
+func (em *EntityManager) NewEntity() (e Entity) {
+	if len(em.graveyard) > 0 {
+		var e_temp *Entity
+		e_temp, em.graveyard = em.graveyard[0], em.graveyard[1:]
+		e.id = e_temp.id
+
+	} else {
+		if em.id_counter == maxEntityIds {
+			panic("exceeded entity assignment")
+		}
+
+		atomic.AddUint32(&em.id_counter, 1)
+		e.id = em.id_counter
+	}
+
+	em.entities = append(em.entities, &e)
 
 	return e
 }
 
-func (e *Entity) AddComponent(comp *Component) {
-	for _, component := range e.components {
-		if reflect.TypeOf(comp) == reflect.TypeOf(component) {
-			return
+func (em *EntityManager) RemoveEntity(e Entity) {
+	delete := -1
+
+	for idx, ent := range em.entities {
+		if ent.id == e.id {
+			delete = idx
+			break
 		}
 	}
 
-	e.components = append(e.components, comp)
+	if delete >= 0 {
+		em.entities = append(em.entities[:delete], em.entities[delete+1:]...)
+		em.graveyard = append(em.graveyard, &e)
+	}
 }

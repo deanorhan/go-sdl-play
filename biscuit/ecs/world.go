@@ -6,7 +6,7 @@ import (
 
 type World struct {
 	systems  []*System
-	entities []*Entity
+	entities EntityManager
 }
 
 func (w *World) AddSystem(sys *System) {
@@ -31,14 +31,4 @@ func (w *World) RemoveSystem(sys *System) {
 	if delete >= 0 {
 		w.systems = append(w.systems[:delete], w.systems[delete+1:]...)
 	}
-}
-
-func (w *World) AddEntity(ent *Entity) {
-	for _, entity := range w.entities {
-		if entity.id == ent.id {
-			return
-		}
-	}
-
-	w.entities = append(w.entities, ent)
 }

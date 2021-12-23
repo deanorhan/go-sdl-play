@@ -24,18 +24,3 @@ func TestWorld_RemoveSystem(t *testing.T) {
 
 	w.RemoveSystem(s)
 }
-
-func TestWorld_AddEntity(t *testing.T) {
-	e := new(Entity)
-	w := new(World)
-
-	w.AddEntity(e)
-
-	w.AddEntity(e)
-	assert.Equal(t, 1, len(w.entities))
-
-	e2 := new(Entity)
-	e2.id = 2
-	w.AddEntity(e2)
-	assert.Equal(t, 2, len(w.entities))
-}
