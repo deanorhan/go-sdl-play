@@ -2,7 +2,9 @@ package biscuit
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/deanorhan/biscuit/ecs"
 	"github.com/veandco/go-sdl2/sdl"
 	"modernc.org/mathutil"
 )
@@ -13,6 +15,9 @@ var (
 	running bool
 
 	cfg *Config
+
+	world *ecs.World
+	delta float64
 )
 
 const (
@@ -20,6 +25,8 @@ const (
 	maxScreenWidth  = 2560
 	minScreenHeight = 600
 	maxScreenHeight = 1440
+
+	maxTicks = 60
 )
 
 func loadConfig() error {
@@ -52,6 +59,8 @@ func InitEngine() error {
 
 	Logger.Debug("Window created")
 
+	world = ecs.NewWorld()
+
 	return nil
 }
 
@@ -72,6 +81,8 @@ func createWindow() error {
 func RunEngine() {
 	running = true
 	for running {
+		startTime := time.Now()
+
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch event.(type) {
 			case *sdl.QuitEvent:
@@ -79,6 +90,10 @@ func RunEngine() {
 				return
 			}
 		}
+
+		world.Process(delta)
+
+		delta = time.Since(startTime).Seconds() * maxTicks
 	}
 }
 
@@ -97,4 +112,12 @@ func ShutdownEngine() {
 	sdl.Quit()
 	Logger.Debug("SDL shutdown")
 	Logger.Sync()
+}
+
+func NewWorld() (w *ecs.World) {
+	return ecs.NewWorld()
+}
+
+func GetWorld() (w *ecs.World) {
+	return world
 }

@@ -1,8 +1,6 @@
 package ecs
 
 type Component interface {
-	onUpdate()
-	onRemove()
 }
 
 type ComponentManger struct {

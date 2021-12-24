@@ -9,6 +9,14 @@ type World struct {
 	entities EntityManager
 }
 
+func NewWorld() (e *World) {
+	return &World{
+		entities: EntityManager{
+			id_counter: 0,
+		},
+	}
+}
+
 func (w *World) NewEntity() (e Entity) {
 	return w.entities.NewEntity()
 }
@@ -20,6 +28,7 @@ func (w *World) AddSystem(sys System) {
 		}
 	}
 
+	sys.Init(w)
 	w.systems = append(w.systems, sys)
 }
 
@@ -34,5 +43,11 @@ func (w *World) RemoveSystem(sys System) {
 
 	if delete >= 0 {
 		w.systems = append(w.systems[:delete], w.systems[delete+1:]...)
+	}
+}
+
+func (w *World) Process(delta float64) {
+	for _, system := range w.systems {
+		system.Process(delta)
 	}
 }
