@@ -16,8 +16,8 @@ var (
 
 	cfg *Config
 
-	world *ecs.World
-	delta float64
+	world         *ecs.World
+	lastFrameTime time.Time //= time.Now()
 )
 
 const (
@@ -80,8 +80,10 @@ func createWindow() error {
 
 func RunEngine() {
 	running = true
+
 	for running {
-		startTime := time.Now()
+		delta := time.Since(lastFrameTime).Seconds() * maxTicks
+		lastFrameTime = time.Now()
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch event.(type) {
@@ -92,8 +94,6 @@ func RunEngine() {
 		}
 
 		world.Process(delta)
-
-		delta = time.Since(startTime).Seconds() * maxTicks
 	}
 }
 

@@ -7,14 +7,20 @@ import (
 
 const maxEntityIds = math.MaxUint32
 
-type Entity struct {
-	id uint32
-}
+type (
+	Entity struct {
+		id uint32
+	}
 
-type EntityManager struct {
-	id_counter uint32
-	entities   []Entity
-	graveyard  []Entity
+	EntityManager struct {
+		id_counter uint32
+		entities   []Entity
+		graveyard  []Entity
+	}
+)
+
+func (e *Entity) Id() uint32 {
+	return e.id
 }
 
 func (em *EntityManager) NewEntity() (e Entity) {
@@ -33,8 +39,7 @@ func (em *EntityManager) NewEntity() (e Entity) {
 	}
 
 	em.entities = append(em.entities, e)
-
-	return e
+	return
 }
 
 func (em *EntityManager) RemoveEntity(e Entity) {

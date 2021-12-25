@@ -21,14 +21,21 @@ func (w *World) NewEntity() (e Entity) {
 	return w.entities.NewEntity()
 }
 
+func (w *World) RemoveEntity(e Entity) {
+	w.entities.RemoveEntity(e)
+}
+
 func (w *World) AddSystem(sys System) {
+	if init, ok := sys.(SystemInit); ok {
+		init.Init(w)
+	}
+
 	for _, system := range w.systems {
 		if reflect.TypeOf(sys) == reflect.TypeOf(system) {
 			return
 		}
 	}
 
-	sys.Init(w)
 	w.systems = append(w.systems, sys)
 }
 
