@@ -2,9 +2,11 @@ package biscuit
 
 import (
 	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/deanorhan/biscuit/ecs"
+	"github.com/deanorhan/biscuit/event"
 	"github.com/veandco/go-sdl2/sdl"
 	"modernc.org/mathutil"
 )
@@ -16,8 +18,7 @@ var (
 
 	cfg *Config
 
-	world         *ecs.World
-	lastFrameTime time.Time //= time.Now()
+	world *ecs.World
 )
 
 const (
@@ -28,6 +29,10 @@ const (
 
 	maxTicks = 60
 )
+
+func init() {
+	runtime.LockOSThread()
+}
 
 func loadConfig() error {
 	var err error
@@ -61,6 +66,17 @@ func InitEngine() error {
 
 	world = ecs.NewWorld()
 
+	evt := event.Event{Name: "boo"}
+	bus := event.Get()
+	bus.Subscribe(evt, func(evt event.Event) {
+		Logger.Debug(fmt.Sprintf("Firing my %v event", evt.Name))
+	})
+
+	bus.Subscribe(evt, world)
+
+	bus.Fire(evt)
+	bus.Fire(event.Event{Name: "moo"})
+
 	return nil
 }
 
@@ -80,6 +96,7 @@ func createWindow() error {
 
 func RunEngine() {
 	running = true
+	lastFrameTime := time.Now()
 
 	for running {
 		delta := time.Since(lastFrameTime).Seconds() * maxTicks

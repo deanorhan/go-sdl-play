@@ -12,7 +12,7 @@ func TestEntityManager_NewEntity(t *testing.T) {
 		em := new(EntityManager)
 		e := em.NewEntity()
 
-		assert.Equal(t, uint32(1), e.id)
+		assert.Equal(t, uint32(1), e.Id())
 		assert.Equal(t, 1, len(em.entities))
 	})
 
