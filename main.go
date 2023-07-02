@@ -2,31 +2,50 @@ package main
 
 import (
 	"fmt"
+	"time"
 
-	"github.com/deanorhan/biscuit"
-	"github.com/deanorhan/biscuit/ecs"
+	"github.com/veandco/go-sdl2/sdl"
 	"go.uber.org/zap"
 )
 
-type DebugSystem struct {
-}
+const (
+	maxTicks = 60
+)
 
-func (ds *DebugSystem) Init(*ecs.World)       {}
-func (ds *DebugSystem) Process(delta float64) { fmt.Println(delta) }
+var (
+	running bool
+)
 
 func main() {
 	logger, _ := zap.NewDevelopment()
 	defer logger.Sync()
 
-	if err := biscuit.InitEngine(); err != nil {
+	if err := InitWindow(); err != nil {
 		logger.Panic(fmt.Sprint("Something went wrong starting up: ", err.Error()))
 	}
-	defer biscuit.ShutdownEngine()
+	defer DestroyWindow()
 
-	world := biscuit.NewWorld()
-	world.NewEntity()
-
-	// biscuit.GetWorld().AddSystem(&DebugSystem{})
-
-	biscuit.RunEngine()
+	RunEngine()
 }
+
+func RunEngine() {
+	running = true
+	lastFrameTime := time.Now()
+
+	for running {
+		delta := time.Since(lastFrameTime).Seconds() * maxTicks
+		lastFrameTime = time.Now()
+
+		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+			switch event.(type) {
+			case *sdl.QuitEvent:
+				running = false
+				return
+			}
+		}
+
+		moo(delta)
+	}
+}
+
+func moo(delta float64) {}
