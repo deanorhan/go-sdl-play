@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"runtime"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/veandco/go-sdl2/sdl"
@@ -22,10 +21,6 @@ var (
 
 	cfg *Config
 )
-
-func init() {
-	runtime.LockOSThread()
-}
 
 func loadConfig() error {
 	var err error
@@ -53,6 +48,11 @@ func InitWindow() error {
 
 	Logger.Debug("SDL initialized")
 
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 4)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG, 1)
+
 	screenWidth := mathutil.ClampInt32(cfg.Display.Width, minScreenWidth, maxScreenWidth)
 	screenHeight := mathutil.ClampInt32(cfg.Display.Height, minScreenHeight, maxScreenHeight)
 
@@ -70,13 +70,12 @@ func InitWindow() error {
 
 	Context, err = Window.GLCreateContext()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("GL Context creation failed: %v", err.Error())
 	}
 
 	Logger.Debug("Created OpenGL context")
 
-	initOpenGL()
-	return err
+	return initOpenGL()
 }
 
 func DestroyWindow() {
@@ -98,14 +97,13 @@ func DestroyWindow() {
 }
 
 // initOpenGL initializes OpenGL and returns an intiialized program.
-func initOpenGL() uint32 {
+func initOpenGL() error {
 	if err := gl.Init(); err != nil {
-		panic(err)
+		return fmt.Errorf("GL failed to init: %v", err.Error())
 	}
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	Logger.Debug(fmt.Sprint("OpenGL version", version))
 
-	prog := gl.CreateProgram()
-	gl.LinkProgram(prog)
-	return prog
+	gl.Viewport(0, 0, cfg.Display.Width, cfg.Display.Height)
+	return nil
 }
