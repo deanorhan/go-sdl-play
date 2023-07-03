@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/deanorhan/go-sdl-play/render"
+	"github.com/deanorhan/go-sdl-play/util"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -53,10 +55,10 @@ func init() {
 
 func main() {
 
-	if err := InitWindow(); err != nil {
-		Logger.Panic(fmt.Sprint("Something went wrong starting up: ", err.Error()))
+	if err := render.InitWindow(); err != nil {
+		util.Logger.Panic(fmt.Sprint("Something went wrong starting up: ", err.Error()))
 	}
-	defer DestroyWindow()
+	defer render.DestroyWindow()
 
 	// OPENGL FLAGS
 	gl.ClearColor(0.0, 0.1, 0.0, 1.0)
@@ -110,7 +112,7 @@ func RunEngine() {
 		gl.BindVertexArray(vao)
 		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(triangle)/3))
 
-		Window.GLSwap()
+		render.Window.GLSwap()
 
 		moo(delta)
 	}

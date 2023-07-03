@@ -1,8 +1,9 @@
-package main
+package render
 
 import (
 	"fmt"
 
+	"github.com/deanorhan/go-sdl-play/util"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/veandco/go-sdl2/sdl"
 	"modernc.org/mathutil"
@@ -19,12 +20,12 @@ var (
 	Window  *sdl.Window
 	Context sdl.GLContext
 
-	cfg *Config
+	cfg *util.Config
 )
 
 func loadConfig() error {
 	var err error
-	cfg, err = NewConfig("./engine.yml")
+	cfg, err = util.NewConfig("./engine.yml")
 	if err != nil {
 		return fmt.Errorf("failed to load config: %v", err.Error())
 	}
@@ -33,20 +34,20 @@ func loadConfig() error {
 }
 
 func InitWindow() error {
-	Logger.Debug("Starting up the engine")
+	util.Logger.Debug("Starting up the engine")
 
 	if err := loadConfig(); err != nil {
 		return err
 	}
 
-	Logger.Debug(fmt.Sprint("We have a config now, debug is ", cfg.Debug))
+	util.Logger.Debug(fmt.Sprint("We have a config now, debug is ", cfg.Debug))
 
 	var err error
 	if err = sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		return fmt.Errorf("SDL failed to init: %v", err.Error())
 	}
 
-	Logger.Debug("SDL initialized")
+	util.Logger.Debug("SDL initialized")
 
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 4)
@@ -66,34 +67,34 @@ func InitWindow() error {
 		return fmt.Errorf("SDL failed to create window: %v", err.Error())
 	}
 
-	Logger.Debug("Window created")
+	util.Logger.Debug("Window created")
 
 	Context, err = Window.GLCreateContext()
 	if err != nil {
 		return fmt.Errorf("GL Context creation failed: %v", err.Error())
 	}
 
-	Logger.Debug("Created OpenGL context")
+	util.Logger.Debug("Created OpenGL context")
 
 	return initOpenGL()
 }
 
 func DestroyWindow() {
-	Logger.Debug("Shutting down the engine")
+	util.Logger.Debug("Shutting down the engine")
 
 	if Context != nil {
 		sdl.GLDeleteContext(Context)
-		Logger.Debug("Context destroyed")
+		util.Logger.Debug("Context destroyed")
 	}
 
 	if Window != nil {
 		Window.Destroy()
-		Logger.Debug("Window destroyed")
+		util.Logger.Debug("Window destroyed")
 	}
 
 	sdl.Quit()
-	Logger.Debug("SDL shutdown")
-	Logger.Sync()
+	util.Logger.Debug("SDL shutdown")
+	util.Logger.Sync()
 }
 
 // initOpenGL initializes OpenGL and returns an intiialized program.
@@ -102,7 +103,7 @@ func initOpenGL() error {
 		return fmt.Errorf("GL failed to init: %v", err.Error())
 	}
 	version := gl.GoStr(gl.GetString(gl.VERSION))
-	Logger.Debug(fmt.Sprint("OpenGL version", version))
+	util.Logger.Debug(fmt.Sprint("OpenGL version", version))
 
 	gl.Viewport(0, 0, cfg.Display.Width, cfg.Display.Height)
 	return nil
