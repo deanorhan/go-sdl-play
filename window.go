@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/veandco/go-sdl2/sdl"
 	"modernc.org/mathutil"
 )
@@ -16,7 +17,8 @@ const (
 )
 
 var (
-	Window *sdl.Window
+	Window  *sdl.Window
+	Context sdl.GLContext
 
 	cfg *Config
 )
@@ -60,13 +62,30 @@ func InitWindow() error {
 		screenWidth, screenHeight,
 		sdl.WINDOW_OPENGL)
 
+	if err != nil {
+		return fmt.Errorf("SDL failed to create window: %v", err.Error())
+	}
+
 	Logger.Debug("Window created")
 
+	Context, err = Window.GLCreateContext()
+	if err != nil {
+		panic(err)
+	}
+
+	Logger.Debug("Created OpenGL context")
+
+	initOpenGL()
 	return err
 }
 
 func DestroyWindow() {
 	Logger.Debug("Shutting down the engine")
+
+	if Context != nil {
+		sdl.GLDeleteContext(Context)
+		Logger.Debug("Context destroyed")
+	}
 
 	if Window != nil {
 		Window.Destroy()
@@ -76,4 +95,17 @@ func DestroyWindow() {
 	sdl.Quit()
 	Logger.Debug("SDL shutdown")
 	Logger.Sync()
+}
+
+// initOpenGL initializes OpenGL and returns an intiialized program.
+func initOpenGL() uint32 {
+	if err := gl.Init(); err != nil {
+		panic(err)
+	}
+	version := gl.GoStr(gl.GetString(gl.VERSION))
+	Logger.Debug(fmt.Sprint("OpenGL version", version))
+
+	prog := gl.CreateProgram()
+	gl.LinkProgram(prog)
+	return prog
 }
